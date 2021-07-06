@@ -60,10 +60,9 @@ int main(int countArgs, char** arg) {
   unsigned char characterSet = uppercase | numbers | lowercase;
   int numberSigns = 8;
   int numberPassword = 10;
-
+  if (countArgs>1) characterSet=0;
   for (int i=1;i<countArgs;i++){
     std::string str = arg[i];
-    numberSigns = 0;
     if (str=="-l") characterSet |= lowercase;
     else if (str=="-u") characterSet |= uppercase;
     else if (str=="-n") characterSet |= numbers;
