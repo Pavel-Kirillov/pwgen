@@ -65,14 +65,6 @@ int StrToInt(std::string str) {
 
 int main(int countArgs, char** arg) {
 	setlocale(LC_ALL, "rus");
-<<<<<<< HEAD
-	std::srand((unsigned int)std::time(nullptr));
-	unsigned char characterSet = 0;
-	int numberSigns = 0;
-	int numberPassword = 0;
-	for (int i = 1; i < countArgs; i++) {
-		std::string str = arg[i];
-=======
 	std::string tmp = arg[0];
 	std::string filename = tmp + ".ini";
 	std::ifstream fileConfig(filename);
@@ -95,7 +87,6 @@ int main(int countArgs, char** arg) {
 	int numberPassword = 0;
 	for (unsigned int i = 0; i < saveArg.size(); i++) {
 		std::string str = saveArg[i];
->>>>>>> dev
 		if (str == "-l") characterSet |= lowercase;
 		else if (str == "-u") characterSet |= uppercase;
 		else if (str == "-n") characterSet |= numbers;
