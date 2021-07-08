@@ -33,20 +33,20 @@ std::string AddSym(unsigned char characterSet) {
 }
 
 void Help(std::string name) {
-	std::cout << "Ğ“ĞµĞ½ĞµÑ€Ğ°Ñ‚Ğ¾Ñ€ Ğ¿Ğ°Ñ€Ğ¾Ğ»ĞµĞ¹\n"
-		<< "Ğ¿Ğ°Ñ€Ğ°Ğ¼ĞµÑ‚Ñ€Ñ‹ Ğ·Ğ°Ğ¿ÑƒÑĞºĞ° " << name << " [-l] [-u] [-n] [-s] [-c 10] [-p 10] [-h]\n"
-		<< "-l ÑÑ‚Ñ€Ğ¾Ñ‡Ğ½Ñ‹Ğµ Ğ±ÑƒĞºĞ²Ñ‹\n"
-		<< "-u Ğ·Ğ°Ğ³Ğ»Ğ°Ğ²Ğ½Ñ‹Ğµ Ğ±ÑƒĞºĞ²Ñ‹\n"
-		<< "-n Ñ†Ğ¸Ñ„Ñ€Ñ‹\n"
-		<< "-s ÑĞ¿ĞµÑ†ÑĞ¸Ğ¼Ğ²Ğ¾Ğ»Ñ‹\n"
-		<< "-Ñ [num] ĞºĞ¾Ğ»Ğ»Ğ¸Ñ‡ĞµÑÑ‚Ğ²Ğ¾ Ğ·Ğ½Ğ°ĞºĞ¾Ğ²\n"
-		<< "-p [num] ĞºĞ¾Ğ»Ğ»Ğ¸Ñ‡ĞµÑÑ‚Ğ²Ğ¾ Ğ¿Ğ°Ñ€Ğ¾Ğ»ĞµĞ¹\n"
-		<< "-h ÑĞ¿Ñ€Ğ°Ğ²ĞºĞ°\n";
+	std::cout << "Ãåíåğàòîğ ïàğîëåé\n"
+		<< "ïàğàìåòğû çàïóñêà " << name << " [-l] [-u] [-n] [-s] [-c 10] [-p 10] [-h]\n"
+		<< "-l ñòğî÷íûå áóêâû\n"
+		<< "-u çàãëàâíûå áóêâû\n"
+		<< "-n öèôğû\n"
+		<< "-s ñïåöñèìâîëû\n"
+		<< "-ñ [num] êîëëè÷åñòâî çíàêîâ\n"
+		<< "-p [num] êîëëè÷åñòâî ïàğîëåé\n"
+		<< "-h ñïğàâêà\n";
 }
 
 int StrToInt(std::string str) {
 	int tmp = 0;
-	for (int i = 0; i < str.length(); i++) {
+	for (unsigned int i = 0; i < str.length(); i++) {
 		if (str[i] >= '0' && str[i] <= '9') {
 			tmp *= 10;
 			tmp += str[i] - '0';
@@ -56,11 +56,11 @@ int StrToInt(std::string str) {
 }
 
 int main(int countArgs, char** arg) {
+	setlocale(LC_ALL, "rus");
 	std::srand((unsigned int)std::time(nullptr));
-	unsigned char characterSet = uppercase | numbers | lowercase;
-	int numberSigns = 8;
-	int numberPassword = 10;
-	if (countArgs > 1) characterSet = 0;
+	unsigned char characterSet = 0;
+	int numberSigns = 0;
+	int numberPassword = 0;
 	for (int i = 1; i < countArgs; i++) {
 		std::string str = arg[i];
 		if (str == "-l") characterSet |= lowercase;
@@ -75,7 +75,7 @@ int main(int countArgs, char** arg) {
 		}
 	}
 	std::string sym = AddSym(characterSet);
-	if (sym != "") {
+	if (sym != "" && numberSigns != 0 && numberPassword != 0) {
 		for (int i = 0; i < numberPassword; i++) {
 			Pwgen(sym, numberSigns);
 		}
