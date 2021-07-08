@@ -4,6 +4,8 @@
 #include <fstream>
 #include <random>
 #include <string>
+#include <thread>
+#include <mutex>
 
 enum {
 	lowercase = 0b0001,
@@ -11,6 +13,8 @@ enum {
 	numbers = 0b0100,
 	specialCharacters = 0b1000
 };
+
+std::mutex lockOutput;
 
 void Pwgen(std::string sym, int count) {
 	std::string pw = "";
@@ -22,7 +26,9 @@ void Pwgen(std::string sym, int count) {
 		int rnd = distribution(generator) - 1;
 		pw += sym[rnd];
 	}
+	lockOutput.lock();
 	std::cout << pw << "\n";
+	lockOutput.unlock();
 }
 
 std::string AddSym(unsigned char characterSet) {
@@ -99,10 +105,10 @@ int main(int countArgs, char** arg) {
 		}
 	}
 	std::string sym = AddSym(characterSet);
+	std::vector<std::thread> passwords;
 	if (sym != "" && numberSigns != 0 && numberPassword != 0) {
-		for (int i = 0; i < numberPassword; i++) {
-			Pwgen(sym, numberSigns);
-		}
+		for (int i = 0; i < numberPassword; i++)
+			passwords.push_back(std::thread(Pwgen,sym, numberSigns));
 		if (countArgs > 1) {
 			std::ofstream fileConfig(filename);
 			if (fileConfig.is_open()) {
@@ -115,6 +121,8 @@ int main(int countArgs, char** arg) {
 				fileConfig.close();
 			}
 		}
+		for (unsigned int i = 0; i < passwords.size(); i++)
+			passwords[i].join();
 	}
 	else {
 		Help(arg[0]);
