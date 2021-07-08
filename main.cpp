@@ -1,6 +1,9 @@
 #include <iostream>
 #include <ctime>
 #include <vector>
+#include <fstream>
+#include <random>
+#include <string>
 
 enum {
 	lowercase = 0b0001,
@@ -11,8 +14,13 @@ enum {
 
 void Pwgen(std::string sym, int count) {
 	std::string pw = "";
+	std::random_device rnd;
+	std::seed_seq seed{ rnd() };
+	std::mt19937 generator(seed);
+	std::uniform_int_distribution<int> distribution(1, sym.size());
 	for (int i = 0; i < count; i++) {
-		pw += sym[rand() % sym.size()];
+		int rnd = distribution(generator) - 1;
+		pw += sym[rnd];
 	}
 	std::cout << pw << "\n";
 }
@@ -57,18 +65,43 @@ int StrToInt(std::string str) {
 
 int main(int countArgs, char** arg) {
 	setlocale(LC_ALL, "rus");
+<<<<<<< HEAD
 	std::srand((unsigned int)std::time(nullptr));
 	unsigned char characterSet = 0;
 	int numberSigns = 0;
 	int numberPassword = 0;
 	for (int i = 1; i < countArgs; i++) {
 		std::string str = arg[i];
+=======
+	std::string tmp = arg[0];
+	std::string filename = tmp + ".ini";
+	std::ifstream fileConfig(filename);
+	std::vector<std::string> saveArg;
+	if (fileConfig.is_open() && countArgs == 1) {
+		while (!fileConfig.eof())
+		{
+			std::string str = "";
+			fileConfig >> str;
+			saveArg.push_back(str);
+		}
+		fileConfig.close();
+	}
+	else {
+		for (int i = 1; i < countArgs; i++)
+			saveArg.push_back(arg[i]);
+	}
+	unsigned char characterSet = 0;
+	int numberSigns = 0;
+	int numberPassword = 0;
+	for (unsigned int i = 0; i < saveArg.size(); i++) {
+		std::string str = saveArg[i];
+>>>>>>> dev
 		if (str == "-l") characterSet |= lowercase;
 		else if (str == "-u") characterSet |= uppercase;
 		else if (str == "-n") characterSet |= numbers;
 		else if (str == "-s") characterSet |= specialCharacters;
-		else if (str == "-c" && i < countArgs - 1) numberSigns = StrToInt(arg[i + 1]);
-		else if (str == "-p" && i < countArgs - 1) numberPassword = StrToInt(arg[i + 1]);
+		else if (str == "-c" && i < saveArg.size() - 1) numberSigns = StrToInt(saveArg[i + 1]);
+		else if (str == "-p" && i < saveArg.size() - 1) numberPassword = StrToInt(saveArg[i + 1]);
 		else if (str == "-h") {
 			Help(arg[0]);
 			return 0;
@@ -78,6 +111,18 @@ int main(int countArgs, char** arg) {
 	if (sym != "" && numberSigns != 0 && numberPassword != 0) {
 		for (int i = 0; i < numberPassword; i++) {
 			Pwgen(sym, numberSigns);
+		}
+		if (countArgs > 1) {
+			std::ofstream fileConfig(filename);
+			if (fileConfig.is_open()) {
+				std::string str = "";
+				for (int i = 1; i < countArgs; i++) {
+					str += arg[i];
+					str += " ";
+				}
+				fileConfig << str;
+				fileConfig.close();
+			}
 		}
 	}
 	else {
