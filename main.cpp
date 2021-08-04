@@ -16,34 +16,54 @@ enum {
 
 std::mutex lockOutput;
 
-void Pwgen(std::string sym, int count) {
-	std::string pw = "";
+bool CheckPassword(std::string password, const std::string sym[4]) {
+	std::string symTmp[4];
+	for (int i = 0; i < 4; i++)
+		symTmp[i] = sym[i];
+	for (unsigned int i = 0; i < password.size(); i++) {
+		for (int j = 0; j < 4; j++) {
+			if (symTmp[j] != "" && password[i] >= symTmp[j][0] && password[i] <= symTmp[j][symTmp[j].size() - 1])
+				symTmp[j] = "";
+		}
+	}
+	for (int i = 0; i < 4; i++) {
+		if (symTmp[i] != "") return false;
+	}
+	return true;
+}
+
+void Pwgen(const std::string sym[4], int count) {
+	std::string symAll = "";
+	for (int i = 0; i < 4; i++)
+		symAll += sym[i];
 	std::random_device rnd;
 	std::seed_seq seed{ rnd() };
 	std::mt19937 generator(seed);
-	std::uniform_int_distribution<int> distribution(1, sym.size());
-	for (int i = 0; i < count; i++) {
-		int rnd = distribution(generator) - 1;
-		pw += sym[rnd];
-	}
+	std::uniform_int_distribution<int> distribution(1, symAll.size());
+	std::string pw;
+	do {
+		pw = "";
+		for (int i = 0; i < count; i++) {
+			int rnd = distribution(generator) - 1;
+			pw += symAll[rnd];
+		}
+	} while (!CheckPassword(pw, sym));
 	lockOutput.lock();
 	std::cout << pw << "\n";
 	lockOutput.unlock();
 }
 
-std::string AddSym(unsigned char characterSet) {
-	std::string sym = "";
+void AddSym(unsigned char characterSet, std::string sym[4]) {
 	for (char i = 33; i <= 126; i++) {
-		if (i >= 97 && i <= 122 && characterSet & lowercase)
-			sym += i;
-		else if (i >= 65 && i <= 90 && (characterSet & uppercase) >> 1)
-			sym += i;
-		else if (i >= 48 && i <= 57 && (characterSet & numbers) >> 2)
-			sym += i;
-		else if (((i >= 33 && i <= 47) || (i >= 58 && i <= 64) || (i >= 91 && i <= 96) || (i >= 123 && i <= 126)) && (characterSet & specialCharacters) >> 3)
-			sym += i;
+		if (i >= 97 && i <= 122 && (characterSet & lowercase) == lowercase)
+			sym[0] += i;
+		else if (i >= 65 && i <= 90 && (characterSet & uppercase) == uppercase)
+			sym[1] += i;
+		else if (i >= 48 && i <= 57 && (characterSet & numbers) == numbers)
+			sym[2] += i;
+		else if (((i >= 33 && i <= 47) || (i >= 58 && i <= 64) || (i >= 91 && i <= 96) || (i >= 123 && i <= 126)) && (characterSet & specialCharacters) == specialCharacters)
+			sym[3] += i;
 	}
-	return sym;
 }
 
 void Help(std::string name) {
@@ -104,11 +124,12 @@ int main(int countArgs, char** arg) {
 			return 0;
 		}
 	}
-	std::string sym = AddSym(characterSet);
+	std::string symArr[4];
+	AddSym(characterSet, symArr);
 	std::vector<std::thread> passwords;
-	if (sym != "" && numberSigns != 0 && numberPassword != 0) {
+	if (symArr != nullptr && numberSigns != 0 && numberPassword != 0) {
 		for (int i = 0; i < numberPassword; i++)
-			passwords.push_back(std::thread(Pwgen,sym, numberSigns));
+			passwords.push_back(std::thread(Pwgen, symArr, numberSigns));
 		if (countArgs > 1) {
 			std::ofstream fileConfig(filename);
 			if (fileConfig.is_open()) {
